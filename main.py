@@ -63,7 +63,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 last_loss = nn.CrossEntropyLoss()
 
-num_epochs = 30
+num_epochs = 50
 
 for epoch in range(num_epochs):
     model.train()
@@ -102,6 +102,7 @@ torch.save({
     'model_state_dict': model.state_dict(),
     'optimizer_state_dict': optimizer.state_dict(),
     'loss': last_loss,  # 保存当前损失值
+    'dataset': dataset,
 }, 'char_rnn_checkpoint.pth')
 
 torch.save(model, 'char_rnn_model_complete.pth')
@@ -117,7 +118,7 @@ model.load_state_dict(checkpoint['model_state_dict'])
 model.to(device)
 model.eval()  # 切换到评估模式
 
-start_text = "君不见黄河之水天上来"  # 你想要补全的文本片段
+start_text = "夏"  # 你想要补全的文本片段
 generated_text = generate_text(model, start_text, dataset.char_to_idx, dataset.idx_to_char,
                                max_length=500,
                                temperature=1.0)
@@ -145,7 +146,7 @@ model = torch.load('char_rnn_model_complete.pth')
 model.to(device)
 model.eval()  # 切换到评估模式
 
-start_text = "人生得意须尽欢"  # 你想要补全的文本片段
+start_text = "春"  # 你想要补全的文本片段
 generated_text = generate_text(model, start_text, dataset.char_to_idx, dataset.idx_to_char,
                                max_length=500,
                                temperature=1.0)

@@ -1,14 +1,13 @@
 import torch
 
-from prepare_data import dataset
-from configure_model import CharRNN
+import configure_model
+from prepare_data import CharDataset
 
 
 def generate_text(model, start_text, char_to_idx, idx_to_char, max_length=200, temperature=1.0,
                   device=torch.device("cuda")):
     """
     使用训练好的模型生成文本。
-
     :param model: 训练好的CharRNN模型
     :param start_text: 初始输入文本（字符串）
     :param char_to_idx: 字符到索引的映射
@@ -49,24 +48,22 @@ def generate_text(model, start_text, char_to_idx, idx_to_char, max_length=200, t
 
 
 if __name__ == '__main__':
-    vocab_size = dataset.vocab_size
-    embed_size = 128
-    hidden_size = 256
-    num_layers = 2
+    # 加载模型和优化器状态
     checkpoint = torch.load('char_rnn_checkpoint.pth')
-    model = CharRNN(vocab_size, embed_size, hidden_size, num_layers)
+    model = configure_model.CharRNN(configure_model.vocab_size, configure_model.embed_size, configure_model.hidden_size,
+                                    configure_model.num_layers)
     model.load_state_dict(checkpoint['model_state_dict'])
-    model.to(torch.device("cuda"))  # 将模型移动到GPU
+    dataset = checkpoint['dataset']
+    # optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    # epoch = checkpoint['epoch']
+    # loss = checkpoint['loss']
+
+    model.to(torch.device("cuda"))
     model.eval()  # 切换到评估模式
 
-    start_text = "人生得意须尽欢"  # 你想要补全的文本片段
-    generated_text = generate_text(model, start_text, dataset.char_to_idx, dataset.idx_to_char, max_length=500,
-                                   temperature=1.0)
-    print(generated_text)
-
-    model = torch.load('char_rnn_model_complete.pth')
-    model.to(torch.device("cuda"))  # 将模型移动到GPU
-    model.eval()  # 切换到评估模式
-    generated_text = generate_text(model, start_text, dataset.char_to_idx, dataset.idx_to_char, max_length=500,
-                                   temperature=1.0)
-    print(generated_text)
+    start_text = "王一鸣"  # 你想要补全的文本片段
+    for char in start_text:
+        generated_text = generate_text(model, char, dataset.char_to_idx, dataset.idx_to_char,
+                                       max_length=10,
+                                       temperature=1.0)
+        print(generated_text)
