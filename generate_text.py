@@ -1,10 +1,10 @@
 import torch
 
-import configure_model
-from prepare_data import CharDataset
+# import configure_model
+# from prepare_data import CharDataset
 
 
-def generate_text(model, start_text, char_to_idx, idx_to_char, max_length=200, temperature=1.0,
+def generate_text(model, start_text, char_to_idx, idx_to_char, max_length, temperature=1.0,
                   device=torch.device("cuda")):
     """
     使用训练好的模型生成文本。
@@ -47,23 +47,27 @@ def generate_text(model, start_text, char_to_idx, idx_to_char, max_length=200, t
     return generated_text
 
 
-if __name__ == '__main__':
-    # 加载模型和优化器状态
-    checkpoint = torch.load('char_rnn_checkpoint.pth')
-    model = configure_model.CharRNN(configure_model.vocab_size, configure_model.embed_size, configure_model.hidden_size,
-                                    configure_model.num_layers)
-    model.load_state_dict(checkpoint['model_state_dict'])
-    dataset = checkpoint['dataset']
-    # optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    # epoch = checkpoint['epoch']
-    # loss = checkpoint['loss']
-
-    model.to(torch.device("cuda"))
-    model.eval()  # 切换到评估模式
-
-    start_text = "王一鸣"  # 你想要补全的文本片段
-    for char in start_text:
-        generated_text = generate_text(model, char, dataset.char_to_idx, dataset.idx_to_char,
-                                       max_length=10,
-                                       temperature=1.0)
-        print(generated_text)
+# if __name__ == '__main__':
+#     # 加载模型和优化器状态
+#     checkpoint = torch.load('char_rnn_checkpoint.pth')
+#     dataset = checkpoint['dataset']
+#     vocab_size = dataset.vocab_size
+#     embed_size = 128
+#     hidden_size = 256
+#     num_layers = 2
+#     model = configure_model.CharRNN(vocab_size, embed_size, hidden_size,
+#                                     num_layers)
+#     model.load_state_dict(checkpoint['model_state_dict'])
+#     # optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+#     # epoch = checkpoint['epoch']
+#     # loss = checkpoint['loss']
+#
+#     model.to(torch.device("cuda"))
+#     model.eval()  # 切换到评估模式
+#
+#     start_text = "王一鸣"  # 你想要补全的文本片段
+#     for char in start_text:
+#         generated_text = generate_text(model, char, dataset.char_to_idx, dataset.idx_to_char,
+#                                        max_length=10,
+#                                        temperature=1.0)
+#         print(generated_text)

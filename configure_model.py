@@ -1,5 +1,5 @@
+import torch
 import torch.nn as nn
-from prepare_data import dataset
 
 
 class CharRNN(nn.Module):
@@ -16,10 +16,13 @@ class CharRNN(nn.Module):
         return out, h
 
 
-# 模型参数
-vocab_size = dataset.vocab_size
-embed_size = 128
-hidden_size = 256
-num_layers = 2
+def configure_model(vocab_size, embed_size=128, hidden_size=256, num_layers=2):
+    model = CharRNN(vocab_size, embed_size, hidden_size, num_layers)
+    return model
 
-model = CharRNN(vocab_size, embed_size, hidden_size, num_layers)
+
+def load_model(checkpoint_path):
+    checkpoint = torch.load(checkpoint_path)
+    model = configure_model(0)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    return model

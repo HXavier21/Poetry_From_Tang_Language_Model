@@ -20,11 +20,10 @@ class CharDataset(Dataset):
         return torch.tensor(x), torch.tensor(y)
 
 
-# 读取文本数据
-with open('poetryFromTang.txt', 'r') as f:
-    text = f.read().lower()
+def prepare_data(data_path, seq_length=100):
+    with open(data_path, 'r') as f:
+        text = f.read().lower()
 
-# 创建数据集和数据加载器
-seq_length = 100
-dataset = CharDataset(text, seq_length)
-dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
+    dataset = CharDataset(text, seq_length)
+    dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
+    return dataset, dataloader
