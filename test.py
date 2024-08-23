@@ -168,5 +168,3 @@ with torch.no_grad():
 avg_loss = total_loss / total_chars
 perplexity = torch.exp(torch.tensor(avg_loss)).item()
 print(f'Perplexity: {perplexity:.4f}')
-
-

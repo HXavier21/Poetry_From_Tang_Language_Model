@@ -7,7 +7,7 @@ import os
 
 def train_model(
         model, dataloader, num_epochs, device=torch.device("cuda"),
-        checkpoint_path='char_rnn_checkpoint.pth'
+        checkpoint_path='gru_char_rnn_checkpoint.pth'
 ):
     model.to(device)
     criterion = nn.CrossEntropyLoss()
@@ -50,4 +50,4 @@ def train_model(
         'optimizer_state_dict': optimizer.state_dict(),
         'criterion': criterion,  # 保存当前损失函数
         'dataloader': dataloader
-    }, 'char_rnn_checkpoint.pth')
+    }, model.network_type + '_char_rnn_checkpoint.pth')
