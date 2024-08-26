@@ -1,22 +1,10 @@
+from enum import Enum
+
 import torch
 
-# import configure_model
-# from prepare_data import CharDataset
 
-
-def generate_text(model, start_text, char_to_idx, idx_to_char, max_length, temperature=1.0,
+def generate_text(model, start_text: str, char_to_idx, idx_to_char, max_length: int, temperature=1.0,
                   device=torch.device("cuda")):
-    """
-    使用训练好的模型生成文本。
-    :param model: 训练好的CharRNN模型
-    :param start_text: 初始输入文本（字符串）
-    :param char_to_idx: 字符到索引的映射
-    :param idx_to_char: 索引到字符的映射
-    :param max_length: 生成文本的最大长度
-    :param temperature: 控制生成的多样性，值越高生成的文本越随机，值越低生成的文本越确定
-    :param device: 运行设备（默认是"cuda"）
-    :return: 生成的文本（字符串）
-    """
     model = model.to(device)
     model.eval()  # 切换到评估模式
     h = None  # 初始化隐藏状态
@@ -47,27 +35,72 @@ def generate_text(model, start_text, char_to_idx, idx_to_char, max_length, tempe
     return generated_text
 
 
-# if __name__ == '__main__':
-#     # 加载模型和优化器状态
-#     checkpoint = torch.load('char_rnn_checkpoint.pth')
-#     dataset = checkpoint['dataset']
-#     vocab_size = dataset.vocab_size
-#     embed_size = 128
-#     hidden_size = 256
-#     num_layers = 2
-#     model = configure_model.CharRNN(vocab_size, embed_size, hidden_size,
-#                                     num_layers)
-#     model.load_state_dict(checkpoint['model_state_dict'])
-#     # optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-#     # epoch = checkpoint['epoch']
-#     # loss = checkpoint['loss']
-#
-#     model.to(torch.device("cuda"))
-#     model.eval()  # 切换到评估模式
-#
-#     start_text = "王一鸣"  # 你想要补全的文本片段
-#     for char in start_text:
-#         generated_text = generate_text(model, char, dataset.char_to_idx, dataset.idx_to_char,
-#                                        max_length=10,
-#                                        temperature=1.0)
-#         print(generated_text)
+class PoetryType(Enum):
+    five_character_quatrain = 24
+    seven_character_quatrain = 32
+    five_character_regulated_verse = 48
+    seven_character_regulated_verse = 64
+    unknown = None
+
+
+def check_characters(text: str, characters: int):
+    if characters not in [5, 7]:
+        return False
+    sentence = text[:characters * 2 + 2]
+    if sentence.endswith('。'):
+        sentences = sentence.split('，')
+        if len(sentences[0]) == characters and len(sentences[1]) == characters + 1:
+            return True
+    return False
+
+
+def check_poetry(text: str, poetry_type: PoetryType):
+    match poetry_type:
+        case PoetryType.five_character_quatrain:
+            if check_characters(text[:12], 5) and check_characters(text[12:], 5):
+                return True
+        case PoetryType.seven_character_quatrain:
+            if check_characters(text[:16], 7) and check_characters(text[16:], 7):
+                return True
+        case PoetryType.five_character_regulated_verse:
+            if all(check_characters(text[i:i + 12], 5) for i in [0, 12, 24, 36]):
+                return True
+        case PoetryType.seven_character_regulated_verse:
+            if all(check_characters(text[i:i + 16], 7) for i in [0, 16, 32, 48]):
+                return True
+        case PoetryType.unknown:
+            return True
+    return False
+
+
+def generate_poetry(model, start_text: str, char_to_idx, idx_to_char, max_length: int, poetry_type: PoetryType,
+                    random_generation=False, temperature=1.0, device=torch.device("cuda")):
+    """
+        使用训练好的模型生成文本。
+        :param model: 训练好的CharRNN模型
+        :param start_text: 初始输入文本（字符串）
+        :param char_to_idx: 字符到索引的映射
+        :param idx_to_char: 索引到字符的映射
+        :param max_length: 生成文本的最大长度
+        :param poetry_type: 诗歌类型
+        :param random_generation: 是否随机生成（默认是False）
+        :param temperature: 控制生成的多样性，值越高生成的文本越随机，值越低生成的文本越确定
+        :param device: 运行设备（默认是"cuda"）
+        :return: 生成的文本（字符串）
+        """
+    while True:
+        if random_generation:
+            start_text = idx_to_char[torch.randint(0, len(idx_to_char), (1,)).item()]
+        generated_text = generate_text(model, start_text, char_to_idx, idx_to_char, max_length, temperature, device)
+        if poetry_type == PoetryType.unknown:
+            return generated_text
+        generated_text = generated_text.replace('\n', '')[:poetry_type.value]
+        if check_poetry(generated_text, poetry_type):
+            return generated_text
+
+
+if __name__ == '__main__':
+    print(check_poetry('春眠不觉晓，处处闻啼鸟。\n夜来风雨声，花落知多少。', PoetryType.five_character_quatrain))
+    print(check_poetry(
+        '陆机二十作文赋，汝更小年能缀文。总角草书又神速，世上儿子徒纷纷。骅骝作驹已汗血，鸷鸟举翮连青云。词源倒流三峡水，笔阵独扫千人军。',
+        PoetryType.seven_character_regulated_verse))

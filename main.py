@@ -31,9 +31,11 @@ if __name__ == '__main__':
                 dataset = checkpoint['dataloader'].dataset
                 model = configure_model.configure_model(network_type, dataset.vocab_size)
                 model.load_state_dict(checkpoint['model_state_dict'])
-                start_text = '云之君兮纷纷而来下'
-                generated_text = generate_text.generate_text(model=model, start_text=start_text,
-                                                             char_to_idx=dataset.char_to_idx,
-                                                             idx_to_char=dataset.idx_to_char,
-                                                             max_length=30)
+                start_text = '夏夜'
+                generated_text = generate_text.generate_poetry(model=model, start_text=start_text,
+                                                               char_to_idx=dataset.char_to_idx,
+                                                               idx_to_char=dataset.idx_to_char,
+                                                               max_length=100,
+                                                               poetry_type=generate_text.PoetryType.five_character_quatrain,
+                                                               random_generation=True)
                 print(generated_text)
