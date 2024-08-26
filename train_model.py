@@ -3,11 +3,13 @@ import torch.optim as optim
 import torch.nn as nn
 from tqdm import tqdm
 import os
+import csv
 
 
 def train_model(
         model, dataloader, num_epochs, device=torch.device("cuda"),
-        checkpoint_path='gru_char_rnn_checkpoint.pth'
+        checkpoint_path='gru_char_rnn_checkpoint.pth',
+        enable_logging=True, log_path='gru_log.csv', cal_perplexity=None
 ):
     model.to(device)
     criterion = nn.CrossEntropyLoss()
@@ -29,20 +31,29 @@ def train_model(
     for epoch in range(epoch, num_epochs):
         model.train()
         h = None
+        loss = 0
         pbar = tqdm(dataloader, total=len(dataloader), desc=f'Epoch {epoch + 1}/{num_epochs}')
         for x, y in pbar:
             x, y = x.to(device), y.to(device)
             optimizer.zero_grad()
-            if h is not None and h.size(1) != x.size(0):
+            if h is not None and h[0].size(1) != x.size(0):
                 h = None
             out, h = model(x, h)
-            h = h.detach()
+            if isinstance(h, tuple):
+                h = (h[0].detach(), h[1].detach())  # 分别对隐藏状态和细胞状态调用 detach()
+            else:
+                h = h.detach()
             out = out[:, -1, :]
             loss = criterion(out, y)
             loss.backward()
             optimizer.step()
             pbar.set_postfix({'Loss': loss.item()})
         pbar.close()
+        if enable_logging:
+            perplexity = cal_perplexity(model, dataloader, criterion, device)
+            with open(log_path, 'a', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow([epoch + 1, loss.item(), perplexity])
 
     torch.save({
         'epoch': num_epochs,  # 保存当前epoch数

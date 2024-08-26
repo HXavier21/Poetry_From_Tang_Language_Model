@@ -1,3 +1,4 @@
 poetryFromTang.txt
 *_char_rnn_model_complete.pth
 *_char_rnn_checkpoint.pth
+*_log.csv

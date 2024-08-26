@@ -17,7 +17,9 @@ if __name__ == '__main__':
                 model = configure_model.configure_model(network_type, dataloader.dataset.vocab_size)
                 num_epochs = int(input('请输入训练的目标轮数：'))
                 train_model.train_model(model=model, dataloader=dataloader, num_epochs=num_epochs,
-                                        checkpoint_path=network_type + '_char_rnn_checkpoint.pth')
+                                        checkpoint_path=network_type + '_char_rnn_checkpoint.pth',
+                                        enable_logging=True, log_path=network_type + '_log.csv',
+                                        cal_perplexity=cal_perplexity.cal_perplexity)
             case '1':
                 checkpoint = torch.load(network_type + '_char_rnn_checkpoint.pth')
                 dataloader = checkpoint['dataloader']
