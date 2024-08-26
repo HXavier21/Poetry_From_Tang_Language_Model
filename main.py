@@ -5,10 +5,11 @@ import configure_model
 import train_model
 import cal_perplexity
 import generate_text
+import draw_log_pic
 from prepare_data import CharDataset
 
 if __name__ == '__main__':
-    mode = input('请选择运行模式（0：训练模式，1：计算困惑度，2：生成文本）：')
+    mode = input('请选择功能（0-训练模型，1-计算困惑度，2-生成诗歌，3-绘制损失曲线）：')
     network_type = input('请选择RNN类型（gru/lstm/rnn）：')
     for case in mode:
         match case:
@@ -43,3 +44,5 @@ if __name__ == '__main__':
                     max_attempts=2000
                 )
                 print(generated_text)
+            case '3':
+                draw_log_pic.draw_log_chart('gru_log.csv', 'lstm_log.csv')

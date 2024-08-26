@@ -50,6 +50,10 @@ def train_model(
             pbar.set_postfix({'Loss': loss.item()})
         pbar.close()
         if enable_logging:
+            if not os.path.exists(log_path):
+                with open(log_path, 'w', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(['Epoch', 'Loss', 'Perplexity'])
             perplexity = cal_perplexity(model, dataloader, criterion, device)
             with open(log_path, 'a', newline='') as f:
                 writer = csv.writer(f)
