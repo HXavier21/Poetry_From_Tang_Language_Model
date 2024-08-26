@@ -13,7 +13,6 @@ class CharRNN(nn.Module):
                 self.rnn = nn.LSTM(embed_size, hidden_size, num_layers, batch_first=True)
             case _:
                 self.rnn = nn.RNN(embed_size, hidden_size, num_layers, batch_first=True)
-        self.rnn = nn.RNN(embed_size, hidden_size, num_layers, batch_first=True)
         self.fc = nn.Linear(hidden_size, vocab_size)
 
     def forward(self, x, h=None):
